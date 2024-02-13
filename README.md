@@ -2,7 +2,7 @@
 W&amp;B integration 101: a simplest starter kit  
 
 ## register 
-register at wand.ai, get your api key: <api_key>
+register at wandb.ai, get your api key: <api_key>
 
 ## then run the python file
 ``python3 mnist-wandb-test.py --project_name test-mnist-wandb-project --epochs 5 --learning_rate 0.001 --wandb_api_key <api_key>`` 
