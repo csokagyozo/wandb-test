@@ -4,7 +4,6 @@ from tensorflow import keras
 import wandb
 from wandb.keras import WandbMetricsLogger
 
-
 def get_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('--learning_rate', type=float, default=0.001, help='the alpha parameter for Adam optimizer')
@@ -35,18 +34,26 @@ X = X.reshape(60000, 784)
 X_test = X_test.reshape(10000, 784)
 
 model = create_model(alpha=alpha)
-wandb.login(key='53f31211ab90a860f633746020d33d9cf8e987d7')
-run = wandb.init(project=project_name, config=
-    {
+model_untrained = keras.models.clone_model(model)
+wandb.login(key=api_key)
+config = {
         "learning_rate": alpha,
         "architecture": "simple_sequential",
         "dataset": "MNIST",
         "epochs": epochs
     }
-)
+
+run = wandb.init(project=project_name, config=config)
+
 model.fit(X, y, epochs=epochs, callbacks = [WandbMetricsLogger(log_freq=1)])
+model_untrained.save('model_untrained.h5')
+model.save('model_trained.h5')
 (loss_train, accuracy_train) = model.evaluate(X, y)
 (loss_test, accuracy_test) = model.evaluate(X_test, y_test)
+
+artifact = wandb.Artifact(name = 'mnist_test_run', type = 'model', metadata = {'accuracy': accuracy_test})
+artifact.add_file('model_untrained.h5')
+artifact.add_file('model_trained.h5')
+run.log_artifact(artifact)
 run.finish()
-print(f'After {epochs} epochs: test loss={loss_test}, test accuracy={accuracy_test}')
 
